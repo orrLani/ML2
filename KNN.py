@@ -11,7 +11,6 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 from sklearn import preprocessing
 
-
 or_id = 0
 itay_id = 3
 
@@ -134,12 +133,15 @@ def normalize(df,row,process):
 
 def Q7_normalize(df):
 
+    df.hist(figsize=(10, 10))
+    plt.show()
+
     df = normalize(df=df,row='PCR_03',process=preprocessing.StandardScaler())
-    
-    df = normalize(df=df,row='PCR_07',process=preprocessing.MinMaxScaler())
+    df = normalize(df=df,row='PCR_07',process=preprocessing.StandardScaler())
     df = normalize(df=df,row= 'PCR_10',process=preprocessing.MinMaxScaler())
     my_knn = kNN(n_neighbors=11)
     my_knn = my_knn.fit(df[['PCR_03','PCR_07','PCR_10','spread']], df['spread'])
+
     print(my_knn.score(my_knn.data, my_knn.targets))
 
 
