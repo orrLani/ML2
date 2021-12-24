@@ -9,6 +9,7 @@ from sklearn.datasets import make_classification
 import seaborn as sns
 
 import matplotlib.pyplot as plt
+from sklearn import preprocessing
 
 
 or_id = 0
@@ -125,23 +126,18 @@ def Q5(df):
     print(my_knn.score(my_knn.data, my_knn.targets))
 
 
+def normalize(df,row,process):
+    temp = df[row].values.reshape(-1, 1)
+    df[row] = process.fit_transform(temp)
 
+    return df
 
 def Q7_normalize(df):
-    # df['spread'] = df['spread'].map(dict(High=1 , Low = -1))
 
-    # arr = df[['PCR_03','PCR_07','PCR_10','spread']].to_numpy()
-    df['PCR_03'] = (df['PCR_03']-df['PCR_03'].mean())/df['PCR_03'].std()
-    df['PCR_07'] = (df['PCR_07']-df['PCR_07'].min())/(df['PCR_07'].max()-df['PCR_07'].min())
-    df['PCR_10'] = (df['PCR_10']-df['PCR_10'].min())/(df['PCR_10'].max()-df['PCR_10'].min())
-    #
-    # df['PCR_03'] = (df['PCR_03']-df['PCR_03'].min())/(df['PCR_03'].max()-df['PCR_03'].min())
-    # df['PCR_07'] = (df['PCR_07']-df['PCR_07'].min())/(df['PCR_07'].max()-df['PCR_07'].min())
-    # df['PCR_10'] = (df['PCR_10']-df['PCR_10'].min())/(df['PCR_10'].max()-df['PCR_10'].min())
-    #
-    # df['PCR_03'] = (df['PCR_03']-df['PCR_03'].mean())/df['PCR_03'].std()
-    # df['PCR_07'] = (df['PCR_07']-df['PCR_07'].mean())/df['PCR_07'].std()
-    # df['PCR_10'] = (df['PCR_10']-df['PCR_10'].mean())/df['PCR_10'].std()
+    df = normalize(df=df,row='PCR_03',process=preprocessing.StandardScaler())
+    
+    df = normalize(df=df,row='PCR_07',process=preprocessing.MinMaxScaler())
+    df = normalize(df=df,row= 'PCR_10',process=preprocessing.MinMaxScaler())
     my_knn = kNN(n_neighbors=11)
     my_knn = my_knn.fit(df[['PCR_03','PCR_07','PCR_10','spread']], df['spread'])
     print(my_knn.score(my_knn.data, my_knn.targets))
