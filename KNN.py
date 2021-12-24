@@ -21,13 +21,23 @@ class kNN(BaseEstimator, ClassifierMixin):
         self.targets = None
     # X is the dataframe
     # y is the labels of target values (names)
+    # def fit(self, X, y):
+    #     # self.data = copy.deepcopy(X)
+    #     self.data = X.copy()
+    #     if y.ndim == 1:
+    #         self.targets = np.expand_dims(a=y,axis=1)
+    #     else:
+    #         self.targets = y.copy()
+    #         # self.targets = copy.deepcopy(y)
+    #
+    #     # we need to do by continous values?
+    #
+    #     # TODO: complete
+    #     return self
     def fit(self, X, y):
         # self.data = copy.deepcopy(X)
-        self.data = X.copy()
-        if y.ndim == 1:
-            self.targets = np.expand_dims(a=y,axis=1)
-        else:
-            self.targets = y.copy()
+        self.data = pd.DataFrame(X)
+        self.targets = pd.DataFrame(y)
             # self.targets = copy.deepcopy(y)
 
         # we need to do by continous values?
@@ -41,9 +51,12 @@ class kNN(BaseEstimator, ClassifierMixin):
         # Note: You can use self.n_neighbors here
         distlist = cdist(X, self.data)
         indexes = np.argpartition(distlist, self.n_neighbors-1)[:, :self.n_neighbors]
-        labels = np.array(list(map(self.targets.__getitem__, indexes.flatten())))
+        tmp = self.targets.to_numpy()
+        labels = np.array(list(map(tmp.__getitem__, indexes.flatten())))
         # labels = np.take(self.targets,indexes)
-        # labels = np.expand_dims(a= labels, axis=0 ).reshape(indexes.shape)
+        labels = np.expand_dims(a= labels, axis=0 ).reshape(indexes.shape)
+
+        # labels = self.targets.values
         predictions = np.array(list(map(lambda x: Counter(x).most_common(1)[0][0], labels)))
         # TODO: compute the predicted labels (+1 or -1)
         return predictions
@@ -105,22 +118,41 @@ def Q2(df):
 
 
 def Q5(df):
-    df['spread'] = df['spread'].map(dict(High=1 , Low = -1))
-    arr = df[['PCR_03','PCR_07','PCR_10','spread']].to_numpy()
-    my_knn = kNN(n_neighbors=5)
-    my_knn = my_knn.fit(arr, df['spread'].to_numpy())
+    # df['spread'] = df['spread'].map(dict(High=1 , Low = -1))
+    # arr = df[['PCR_03','PCR_07','PCR_10','spread']].to_numpy()
+    my_knn = kNN(n_neighbors=11)
+    my_knn = my_knn.fit(df[['PCR_03','PCR_07','PCR_10','spread']], df['spread'])
     print(my_knn.score(my_knn.data, my_knn.targets))
 
 
 
 
+def Q7_normalize(df):
+    # df['spread'] = df['spread'].map(dict(High=1 , Low = -1))
 
+    # arr = df[['PCR_03','PCR_07','PCR_10','spread']].to_numpy()
+    df['PCR_03'] = (df['PCR_03']-df['PCR_03'].mean())/df['PCR_03'].std()
+    df['PCR_07'] = (df['PCR_07']-df['PCR_07'].min())/(df['PCR_07'].max()-df['PCR_07'].min())
+    df['PCR_10'] = (df['PCR_10']-df['PCR_10'].min())/(df['PCR_10'].max()-df['PCR_10'].min())
+    #
+    # df['PCR_03'] = (df['PCR_03']-df['PCR_03'].min())/(df['PCR_03'].max()-df['PCR_03'].min())
+    # df['PCR_07'] = (df['PCR_07']-df['PCR_07'].min())/(df['PCR_07'].max()-df['PCR_07'].min())
+    # df['PCR_10'] = (df['PCR_10']-df['PCR_10'].min())/(df['PCR_10'].max()-df['PCR_10'].min())
+    #
+    # df['PCR_03'] = (df['PCR_03']-df['PCR_03'].mean())/df['PCR_03'].std()
+    # df['PCR_07'] = (df['PCR_07']-df['PCR_07'].mean())/df['PCR_07'].std()
+    # df['PCR_10'] = (df['PCR_10']-df['PCR_10'].mean())/df['PCR_10'].std()
+    my_knn = kNN(n_neighbors=11)
+    my_knn = my_knn.fit(df[['PCR_03','PCR_07','PCR_10','spread']], df['spread'])
+    print(my_knn.score(my_knn.data, my_knn.targets))
 
 
 if __name__ == '__main__':
 
     df = pd.read_csv('train_clean.csv.csv')
+    df['spread'] = df['spread'].map(dict(High=1 , Low = -1))
     Q5(df)
+    Q7_normalize(df)
     # f = kNN(2)
     # X = np.array([[1,1,1],[1,2,3],[-1,-1,-1]])
     # y = np.array([1 , -1 ,1])
