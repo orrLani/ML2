@@ -1,5 +1,7 @@
 from sklearn.base import BaseEstimator, ClassifierMixin
 import numpy as np
+
+import verify_gradients
 class SoftSVM(BaseEstimator, ClassifierMixin):
     """
     Custom C-Support Vector Classification.
