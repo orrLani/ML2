@@ -103,7 +103,38 @@ def Q2(df):
     s.sort_values(kind="quicksort", ascending=False)
 
 
+def Q3(df):
+    fig = plt.figure()
+    ax = fig.add_subplot(projection='3d')
 
+    n = 100
+    ax.tick_params(axis='x', colors='green')
+    ax.tick_params(axis='y', colors='blue')
+    ax.tick_params(axis='z', colors='black')
+    # For each set of style and range settings, plot n random points in the box
+    # defined by x in [23, 32], y in [0, 100], z in [zlow, zhigh].
+    samples = df.sample(n= n )
+    for m, zlow, zhigh in [('o', -50, -25), ('^', -30, -5)]:
+        if (samples['spread'].dtypes == np.int64 ):
+            samples1 = samples[samples['spread'] == 1]
+            samples2 = samples[samples['spread'] == -1]
+        else:
+            samples1 = samples[samples['spread'] == 'High']
+            samples2 = samples[samples['spread'] == 'Low']
+        pcr03 = samples1['PCR_03'].values
+        pcr07 = samples1['PCR_07'].values
+        pcr10 = samples1['PCR_10'].values
+        ax.scatter(pcr07, pcr10, pcr03, marker=m, c= 'green')
+        pcr03 = samples2['PCR_03'].values
+        pcr07 = samples2['PCR_07'].values
+        pcr10 = samples2['PCR_10'].values
+        ax.scatter(pcr07, pcr10, pcr03, marker=m, c='red')
+
+    ax.set_zlabel('PCR_03')
+    ax.set_ylabel('PCR_10')
+    ax.set_xlabel('PCR_07')
+    ax.view_init(30, 25)
+    plt.show()
 
 def Q5(df):
     # df['spread'] = df['spread'].map(dict(High=1 , Low = -1))
@@ -119,7 +150,7 @@ def normalize(df,row,process):
 
     return df
 
-def Q7_normalize(df):
+def Q7(df):
 
 
     df = normalize(df=df,row='PCR_03',process=preprocessing.StandardScaler())
@@ -159,24 +190,27 @@ def Q8(df_before,df_after):
     plt.show()
 
     pass
+
 from sklearn.model_selection import validation_curve
 def Q9(df:pd.DataFrame):
 
-    # my_knn = kNN(n_neighbors=11)
-    # from sklearn.neighbors import KNeighborsClassifier
-    my_knn = KNeighborsClassifier(n_neighbors=11)
-    X = df[['PCR_03', 'PCR_07', 'PCR_10']]
-    y = df['spread']
+    k = np.arange(1, 61, 2)
     train_scores, valid_scores = validation_curve(
-        estimator=KNeighborsClassifier(),
-        X=X,
-        y=y,
+        estimator=kNN(),
+        X=df[['PCR_03', 'PCR_07', 'PCR_10']],
+        y=df['spread'],
         param_name="n_neighbors",
         param_range = np.arange(1, 61, 2),
         cv=8)
-
-    print(train_scores)
-    print(valid_scores)
+    train_mean = train_scores.mean(axis=1)
+    valid_mean = valid_scores.mean(axis=1)
+    plt.plot(k,train_mean,'bo', label="training accuracy")
+    plt.plot(k, valid_mean, 'ro',label="validation accuracy")
+    plt.xlabel('Accuracy')
+    plt.ylabel('K (neighbours) value')
+    plt.title("k value - Accuracy")
+    plt.legend(loc='best')
+    plt.show()
 
 
 
@@ -187,49 +221,11 @@ if __name__ == '__main__':
     df =  pd.read_csv('train_clean.csv.csv')
     df['spread'] = df['spread'].map(dict(High=1 , Low = -1))
     Q5(df)
-    df = Q7_normalize(df.copy())
+    df = Q7(df.copy())
 
-    # df_normalize = prepare.normalize_data(df.copy())
+    df_normalize = prepare.normalize_data(df.copy())
 
     # Q8(df,df_normalize)
-    # Q9(df=df)
+    Q9(df=df_normalize)
 
 
-    # f = kNN(2)
-    # X = np.array([[1,1,1],[1,2,3],[-1,-1,-1]])
-    # y = np.array([1 , -1 ,1])
-    #
-    # f.fit(X,y)
-    # f.predict(X)
-    # print("meow")
-    #
-    # fig = plt.figure()
-    # ax = fig.add_subplot(projection='3d')
-    #
-    # n = 100
-    # ax.tick_params(axis='x', colors='green')
-    # ax.tick_params(axis='y', colors='blue')
-    # ax.tick_params(axis='z', colors='black')
-    # # For each set of style and range settings, plot n random points in the box
-    # # defined by x in [23, 32], y in [0, 100], z in [zlow, zhigh].
-    # df = pd.read_csv("train_clean.csv.csv")
-    # samples = df.sample(n= n )
-    # for m, zlow, zhigh in [('o', -50, -25), ('^', -30, -5)]:
-    #     samples1 = samples[samples['spread'] == 'High']
-    #     pcr03 = samples1['PCR_03'].values
-    #     pcr07 = samples1['PCR_07'].values
-    #     pcr10 = samples1['PCR_10'].values
-    #     ax.scatter(pcr07, pcr10, pcr03, marker=m, c= 'green')
-    #     samples2 = samples[samples['spread'] == 'Low']
-    #     pcr03 = samples2['PCR_03'].values
-    #     pcr07 = samples2['PCR_07'].values
-    #     pcr10 = samples2['PCR_10'].values
-    #     ax.scatter(pcr07, pcr10, pcr03, marker=m, c='red')
-    #
-    #
-    #
-    # ax.set_zlabel('PCR_03')
-    # ax.set_ylabel('PCR_10')
-    # ax.set_xlabel('PCR_07')
-    # # ax.view_init(30, 25)
-    # plt.show()
