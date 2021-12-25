@@ -115,7 +115,38 @@ def Q2(df):
     s.sort_values(kind="quicksort", ascending=False)
 
 
+def Q3(df):
+    fig = plt.figure()
+    ax = fig.add_subplot(projection='3d')
 
+    n = 100
+    ax.tick_params(axis='x', colors='green')
+    ax.tick_params(axis='y', colors='blue')
+    ax.tick_params(axis='z', colors='black')
+    # For each set of style and range settings, plot n random points in the box
+    # defined by x in [23, 32], y in [0, 100], z in [zlow, zhigh].
+    samples = df.sample(n= n )
+    for m, zlow, zhigh in [('o', -50, -25), ('^', -30, -5)]:
+        if (samples['spread'].dtypes == np.int64 ):
+            samples1 = samples[samples['spread'] == 1]
+            samples2 = samples[samples['spread'] == -1]
+        else:
+            samples1 = samples[samples['spread'] == 'High']
+            samples2 = samples[samples['spread'] == 'Low']
+        pcr03 = samples1['PCR_03'].values
+        pcr07 = samples1['PCR_07'].values
+        pcr10 = samples1['PCR_10'].values
+        ax.scatter(pcr07, pcr10, pcr03, marker=m, c= 'green')
+        pcr03 = samples2['PCR_03'].values
+        pcr07 = samples2['PCR_07'].values
+        pcr10 = samples2['PCR_10'].values
+        ax.scatter(pcr07, pcr10, pcr03, marker=m, c='red')
+
+    ax.set_zlabel('PCR_03')
+    ax.set_ylabel('PCR_10')
+    ax.set_xlabel('PCR_07')
+    ax.view_init(30, 25)
+    plt.show()
 
 def Q5(df):
     # df['spread'] = df['spread'].map(dict(High=1 , Low = -1))
