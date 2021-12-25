@@ -6,6 +6,8 @@ import copy
 import pandas as pd
 from collections import Counter
 from sklearn.datasets import make_classification
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.model_selection import cross_val_score
 import seaborn as sns
 import prepare
 import matplotlib.pyplot as plt
@@ -19,21 +21,7 @@ class kNN(BaseEstimator, ClassifierMixin):
         self.n_neighbors = n_neighbors
         self.data = None
         self.targets = None
-    # X is the dataframe
-    # y is the labels of target values (names)
-    # def fit(self, X, y):
-    #     # self.data = copy.deepcopy(X)
-    #     self.data = X.copy()
-    #     if y.ndim == 1:
-    #         self.targets = np.expand_dims(a=y,axis=1)
-    #     else:
-    #         self.targets = y.copy()
-    #         # self.targets = copy.deepcopy(y)
-    #
-    #     # we need to do by continous values?
-    #
-    #     # TODO: complete
-    #     return self
+
     def fit(self, X, y):
         # self.data = copy.deepcopy(X)
         self.data = pd.DataFrame(X)
@@ -121,7 +109,7 @@ def Q5(df):
     # df['spread'] = df['spread'].map(dict(High=1 , Low = -1))
     # arr = df[['PCR_03','PCR_07','PCR_10','spread']].to_numpy()
     my_knn = kNN(n_neighbors=11)
-    my_knn = my_knn.fit(df[['PCR_03','PCR_07','PCR_10','spread']], df['spread'])
+    my_knn = my_knn.fit(df[['PCR_03','PCR_07','PCR_10']], df['spread'])
     print(my_knn.score(my_knn.data, my_knn.targets))
 
 
@@ -136,16 +124,16 @@ def Q7_normalize(df):
 
     df = normalize(df=df,row='PCR_03',process=preprocessing.StandardScaler())
     df = normalize(df=df,row='PCR_07',process=preprocessing.StandardScaler())
-    df = normalize(df=df,row= 'PCR_10',process=preprocessing.MinMaxScaler())
+    df = normalize(df=df,row= 'PCR_10',process=preprocessing.StandardScaler())
     #df = normalize(df=df, row='PCR_10', process=preprocessing.StandardScaler())
     my_knn = kNN(n_neighbors=11)
 
     # print the knn score
-    my_knn = my_knn.fit(df[['PCR_03','PCR_07','PCR_10','spread']], df['spread'])
+    my_knn = my_knn.fit(df[['PCR_03','PCR_07','PCR_10']], df['spread'])
     print(my_knn.score(my_knn.data, my_knn.targets))
 
     # normalize the rest features
-
+    return df
 def Q8(df_before,df_after):
 
     # df.hist(figsize=(10, 10))
@@ -170,22 +158,41 @@ def Q8(df_before,df_after):
 
     plt.show()
 
-
-
     pass
+from sklearn.model_selection import validation_curve
+def Q9(df:pd.DataFrame):
+
+    # my_knn = kNN(n_neighbors=11)
+    # from sklearn.neighbors import KNeighborsClassifier
+    my_knn = KNeighborsClassifier(n_neighbors=11)
+    X = df[['PCR_03', 'PCR_07', 'PCR_10']]
+    y = df['spread']
+    train_scores, valid_scores = validation_curve(
+        estimator=KNeighborsClassifier(),
+        X=X,
+        y=y,
+        param_name="n_neighbors",
+        param_range = np.arange(1, 61, 2),
+        cv=8)
+
+    print(train_scores)
+    print(valid_scores)
+
+
 
 
 if __name__ == '__main__':
 
-    df = pd.read_csv('train_clean.csv.csv')
+    # df = pd.read_csv('ido.csv')
+    df =  pd.read_csv('train_clean.csv.csv')
     df['spread'] = df['spread'].map(dict(High=1 , Low = -1))
     Q5(df)
-    # Q7_normalize(df)
+    df = Q7_normalize(df.copy())
 
-    df_normalize = prepare.normalize_data(df.copy())
+    # df_normalize = prepare.normalize_data(df.copy())
 
-
-    Q8(df,df_normalize)
+    # Q8(df,df_normalize)
+    # Q9(df=df)
 
 
     # f = kNN(2)
