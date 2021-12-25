@@ -7,7 +7,7 @@ import pandas as pd
 from collections import Counter
 from sklearn.datasets import make_classification
 import seaborn as sns
-
+import prepare
 import matplotlib.pyplot as plt
 from sklearn import preprocessing
 
@@ -140,9 +140,15 @@ def Q7_normalize(df):
     df = normalize(df=df,row='PCR_07',process=preprocessing.StandardScaler())
     df = normalize(df=df,row= 'PCR_10',process=preprocessing.MinMaxScaler())
     my_knn = kNN(n_neighbors=11)
-    my_knn = my_knn.fit(df[['PCR_03','PCR_07','PCR_10','spread']], df['spread'])
 
+    # print the knn score
+    my_knn = my_knn.fit(df[['PCR_03','PCR_07','PCR_10','spread']], df['spread'])
     print(my_knn.score(my_knn.data, my_knn.targets))
+
+    # normalize the rest features
+
+def Q8(df_before,df_after):
+
 
 
 if __name__ == '__main__':
@@ -150,7 +156,10 @@ if __name__ == '__main__':
     df = pd.read_csv('train_clean.csv.csv')
     df['spread'] = df['spread'].map(dict(High=1 , Low = -1))
     Q5(df)
-    Q7_normalize(df)
+    # Q7_normalize(df)
+
+    df = prepare.normalize_data(df)
+
     # f = kNN(2)
     # X = np.array([[1,1,1],[1,2,3],[-1,-1,-1]])
     # y = np.array([1 , -1 ,1])
