@@ -7,7 +7,7 @@ import pandas as pd
 from collections import Counter
 from sklearn.datasets import make_classification
 import seaborn as sns
-
+import prepare
 import matplotlib.pyplot as plt
 from sklearn import preprocessing
 
@@ -133,16 +133,46 @@ def normalize(df,row,process):
 
 def Q7_normalize(df):
 
-    df.hist(figsize=(10, 10))
-    plt.show()
 
     df = normalize(df=df,row='PCR_03',process=preprocessing.StandardScaler())
     df = normalize(df=df,row='PCR_07',process=preprocessing.StandardScaler())
     df = normalize(df=df,row= 'PCR_10',process=preprocessing.MinMaxScaler())
+    #df = normalize(df=df, row='PCR_10', process=preprocessing.StandardScaler())
     my_knn = kNN(n_neighbors=11)
-    my_knn = my_knn.fit(df[['PCR_03','PCR_07','PCR_10','spread']], df['spread'])
 
+    # print the knn score
+    my_knn = my_knn.fit(df[['PCR_03','PCR_07','PCR_10','spread']], df['spread'])
     print(my_knn.score(my_knn.data, my_knn.targets))
+
+    # normalize the rest features
+
+def Q8(df_before,df_after):
+
+    # df.hist(figsize=(10, 10))
+    # df_normalize = prepare.normalize_data(df.copy())
+    # df_normalize.hist(figsize=(10, 10))
+
+    # print household_income
+    df_before['household_income'].plot.hist(title="household_income before normalize")
+    plt.show()
+    df_after['household_income'].plot.hist(title="household_income after MinMaxScaler normalize")
+    plt.show()
+    # print sugar_levels
+    df_before['sugar_levels'].plot.hist(title="sugar_levels before normalize")
+    plt.show()
+    df_after['sugar_levels'].plot.hist(title="sugar_levels after StandardScaler normalize")
+    plt.show()
+    # ax("Frequency")
+    # ax.set_ylable('Standard deviation')
+
+
+    # prepare to read the graths
+
+    plt.show()
+
+
+
+    pass
 
 
 if __name__ == '__main__':
@@ -150,7 +180,14 @@ if __name__ == '__main__':
     df = pd.read_csv('train_clean.csv.csv')
     df['spread'] = df['spread'].map(dict(High=1 , Low = -1))
     Q5(df)
-    Q7_normalize(df)
+    # Q7_normalize(df)
+
+    df_normalize = prepare.normalize_data(df.copy())
+
+
+    Q8(df,df_normalize)
+
+
     # f = kNN(2)
     # X = np.array([[1,1,1],[1,2,3],[-1,-1,-1]])
     # y = np.array([1 , -1 ,1])
