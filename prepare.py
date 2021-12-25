@@ -9,7 +9,7 @@ from sklearn.impute import SimpleImputer
 from sklearn import preprocessing
 
 
-questions_module = __import__('205819220-308060873')
+# questions_module = __import__('205819220-308060873')
 
 
 def normalize(df,row,process):
@@ -23,6 +23,7 @@ def normalize_data(data:pd.DataFrame):
     data =normalize(df=data, row='num_of_siblings', process=preprocessing.StandardScaler())
     data =normalize(df=data, row='conversations_per_day', process=preprocessing.MinMaxScaler())
     data =normalize(df=data, row='household_income', process=preprocessing.MinMaxScaler())
+    # data = normalize(df=data, row='household_income', process=preprocessing.StandardScaler())
     data =normalize(df=data, row='sugar_levels', process=preprocessing.StandardScaler())
     data =normalize(df=data, row='sport_activity', process=preprocessing.MinMaxScaler())
 

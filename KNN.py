@@ -133,12 +133,11 @@ def normalize(df,row,process):
 
 def Q7_normalize(df):
 
-    df.hist(figsize=(10, 10))
-    plt.show()
 
     df = normalize(df=df,row='PCR_03',process=preprocessing.StandardScaler())
     df = normalize(df=df,row='PCR_07',process=preprocessing.StandardScaler())
     df = normalize(df=df,row= 'PCR_10',process=preprocessing.MinMaxScaler())
+    #df = normalize(df=df, row='PCR_10', process=preprocessing.StandardScaler())
     my_knn = kNN(n_neighbors=11)
 
     # print the knn score
@@ -149,6 +148,31 @@ def Q7_normalize(df):
 
 def Q8(df_before,df_after):
 
+    # df.hist(figsize=(10, 10))
+    # df_normalize = prepare.normalize_data(df.copy())
+    # df_normalize.hist(figsize=(10, 10))
+
+    # print household_income
+    df_before['household_income'].plot.hist(title="household_income before normalize")
+    plt.show()
+    df_after['household_income'].plot.hist(title="household_income after MinMaxScaler normalize")
+    plt.show()
+    # print sugar_levels
+    df_before['sugar_levels'].plot.hist(title="sugar_levels before normalize")
+    plt.show()
+    df_after['sugar_levels'].plot.hist(title="sugar_levels after StandardScaler normalize")
+    plt.show()
+    # ax("Frequency")
+    # ax.set_ylable('Standard deviation')
+
+
+    # prepare to read the graths
+
+    plt.show()
+
+
+
+    pass
 
 
 if __name__ == '__main__':
@@ -158,7 +182,11 @@ if __name__ == '__main__':
     Q5(df)
     # Q7_normalize(df)
 
-    df = prepare.normalize_data(df)
+    df_normalize = prepare.normalize_data(df.copy())
+
+
+    Q8(df,df_normalize)
+
 
     # f = kNN(2)
     # X = np.array([[1,1,1],[1,2,3],[-1,-1,-1]])
