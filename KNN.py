@@ -8,6 +8,9 @@ from collections import Counter
 from sklearn.datasets import make_classification
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.model_selection import cross_val_score
+from sklearn.model_selection import cross_val_predict
+from sklearn.metrics import confusion_matrix
+
 import seaborn as sns
 import prepare
 import matplotlib.pyplot as plt
@@ -192,7 +195,7 @@ def Q8(df_before,df_after):
     pass
 
 from sklearn.model_selection import validation_curve
-def Q9(df:pd.DataFrame):
+def Q9(df:pd.DataFrame) -> int:
 
     k = np.arange(1, 61, 2)
     train_scores, valid_scores = validation_curve(
@@ -204,15 +207,37 @@ def Q9(df:pd.DataFrame):
         cv=8)
     train_mean = train_scores.mean(axis=1)
     valid_mean = valid_scores.mean(axis=1)
-    plt.plot(k,train_mean,'bo', label="training accuracy")
-    plt.plot(k, valid_mean, 'ro',label="validation accuracy")
+    plt.plot(k,train_mean,'bo', label="training validation accuracy")
+    plt.plot(k, valid_mean, 'ro',label="training accuracy")
     plt.xlabel('Accuracy')
     plt.ylabel('K (neighbours) value')
     plt.title("k value - Accuracy")
     plt.legend(loc='best')
     plt.show()
+    k = valid_mean.max()
+    return k
+
+from sklearn.metrics import plot_confusion_matrix
+import seaborn as sn
+
+def Q10(df:pd.DataFrame,k):
+    my_knn = kNN(n_neighbors=k)
+    X = df[['PCR_03', 'PCR_07', 'PCR_10']]
+    y = df['spread']
+    y_pred = cross_val_predict(my_knn, X, y, cv=8)
+    conf_mat = confusion_matrix(y, y_pred)
+    print(conf_mat)
+    sn.set(font_scale=1.1)  # for label size
+    conf_mat = pd.DataFrame(conf_mat,range(2), range(2))
+    xlabels = ['Positive',' Negative']
+    ylabels = ['Positive', 'Negative']
+    ax = sn.heatmap(conf_mat, xticklabels=xlabels,yticklabels=ylabels, fmt='g',annot=True)
+    ax.set_title('cross-validated 2 × 2')
+    ax.set_xlabel('Actual labels')
+    ax.set_ylabel('Predicted')
 
 
+    plt.show()
 
 
 if __name__ == '__main__':
@@ -220,12 +245,17 @@ if __name__ == '__main__':
     # df = pd.read_csv('ido.csv')
     df =  pd.read_csv('train_clean.csv.csv')
     df['spread'] = df['spread'].map(dict(High=1 , Low = -1))
-    Q5(df)
-    df = Q7(df.copy())
+    # Q5(df)
+    # df = Q7(df.copy())
 
     df_normalize = prepare.normalize_data(df.copy())
 
     # Q8(df,df_normalize)
-    Q9(df=df_normalize)
+   # k = Q9(df=df_normalize)
+    k = 9
+    # best k is 9
+    Q10(df=df_normalize,k=k)
+
+
 
 
