@@ -21,7 +21,8 @@ def numerical_subgradient(w, b, C, X, y, delta=1e-4):
     return g_w, g_b
 
 
-def compare_gradients(X, y, deltas, C=1, REPEATS=100):
+
+def compare_gradients(X, y, deltas, C=1, REPEATS=100, figsize=(10, 6)):
     residual_means = []
 
     for delta in deltas:
@@ -41,12 +42,14 @@ def compare_gradients(X, y, deltas, C=1, REPEATS=100):
 
         residual_means.append(np.mean(residuals))
 
+    plt.figure(figsize=figsize)
+    plt.title('Residuals of analytical and numerical gradients', fontsize=22)
     plt.plot(deltas, residual_means, linewidth=3)
     plt.yscale('log')
     plt.xscale('log')
     plt.xlabel('$\delta$', fontsize=18)
     plt.ylabel('dist(analytic, numeric$_\delta$)', fontsize=18)
-    plt.ylabel(r'$\left\Vert p_{C}\left(w,b\right) - u_{\delta} \left(w,b\right)\right\Vert$', fontsize=18)
+    plt.ylabel(r'$\left\Vert \nabla_{w}p_{C}\left(w,b\right) - u_{\delta} \left(w,b\right)\right\Vert$', fontsize=18)
 
     plt.grid(alpha=0.5)
     plt.show()
@@ -128,10 +131,11 @@ class SoftSVM(BaseEstimator, ClassifierMixin):
 
         f = lambda x : -1 if x < 1 else 0
         f_outputs = np.apply_along_axis(f,1,hinge_inputs).reshape(-1,1)
+
         g_w_inner = np.multiply(np.multiply(f_outputs, y.reshape(-1,1)), X)
         g_w =2*w + C * np.sum(g_w_inner,axis=0)
 
-        g_b = np.sum(np.multiply(f_outputs, y.reshape(-1,1)))
+        g_b = C*np.sum(np.multiply(f_outputs, y.reshape(-1,1)))
         # g_w = None
         # g_b = 0.0
 
