@@ -107,8 +107,9 @@ class SoftSVM(BaseEstimator, ClassifierMixin):
         loss = 0.0
 
         # loss = np.power(norm,2) * C * np.sum( (max(0,1-hinge_inputs)))
-        f = lambda  x :  max(0,1-x)
-        f_outputs = np.apply_along_axis(f,1,hinge_inputs)
+        # f = lambda  x :  max(0,1-x)
+        # f_outputs = np.apply_along_axis(f,1,hinge_inputs)
+        f_outputs = np.maximum(0,1-hinge_inputs)
         loss = np.power(norm, 2) +( C * np.sum(f_outputs))
 
         return loss
@@ -129,13 +130,15 @@ class SoftSVM(BaseEstimator, ClassifierMixin):
         margins = (X.dot(w) + b).reshape(-1, 1)
         hinge_inputs = np.multiply( margins,y.reshape(-1,1))
 
-        f = lambda x : -1 if x < 1 else 0
-        f_outputs = np.apply_along_axis(f,1,hinge_inputs).reshape(-1,1)
+        # f = lambda x : -1 if x < 1 else 0
+        # f_outputs = np.apply_along_axis(f,1,hinge_inputs).reshape(-1,1)
+        hinge_inputs[hinge_inputs < 1] = -1
+        hinge_inputs[hinge_inputs >= 1] = 0
 
-        g_w_inner = np.multiply(np.multiply(f_outputs, y.reshape(-1,1)), X)
+        g_w_inner = np.multiply(np.multiply(hinge_inputs, y.reshape(-1,1)), X)
         g_w =2*w + C * np.sum(g_w_inner,axis=0)
 
-        g_b = C*np.sum(np.multiply(f_outputs, y.reshape(-1,1)))
+        g_b = C*np.sum(np.multiply(hinge_inputs, y.reshape(-1,1)))
         # g_w = None
         # g_b = 0.0
 
@@ -239,4 +242,6 @@ if __name__ == '__main__':
     df_normalize.pop('risk')
     df_normalize.pop('spread')
     df_normalize.pop('is_army')
+    df_normalize.pop('Unnamed: 0')
+    # df_normalize['PCR_10'] =  (df_normalize['PCR_10'] - df_normalize['PCR_10'].min())/(df_normalize['PCR_10'].max() - df_normalize['PCR_10'].min())
     compare_gradients(df_normalize.values, df['covid'].values , deltas=np.logspace(-5, -1, 9))
