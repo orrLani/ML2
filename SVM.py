@@ -1,7 +1,9 @@
 import numpy as np
 import pandas as pd
 from sklearn.base import BaseEstimator, ClassifierMixin
-import matplotlib as plt
+import matplotlib.pyplot as plt
+
+
 import prepare
 #############
 ############3
@@ -48,6 +50,7 @@ def compare_gradients(X, y, deltas, C=1, REPEATS=100):
 
     plt.grid(alpha=0.5)
     plt.show()
+
 
 ###############
 #################################
@@ -96,11 +99,15 @@ class SoftSVM(BaseEstimator, ClassifierMixin):
         hinge_inputs = np.multiply(margins, y.reshape(-1, 1))
 
         norm = np.linalg.norm(w)
-        np.power(norm,2)
+        # np.power(norm,2)
         # TODO: complete the loss calculation
         loss = 0.0
 
-        loss = np.power(norm,2) * C * np.sum( (max(0,1-hinge_inputs)))
+        # loss = np.power(norm,2) * C * np.sum( (max(0,1-hinge_inputs)))
+        f = lambda  x :  max(0,1-x)
+        f_outputs = np.apply_along_axis(f,1,hinge_inputs)
+        loss = np.power(norm, 2) +( C * np.sum(f_outputs))
+
         return loss
 
     @staticmethod
@@ -117,12 +124,14 @@ class SoftSVM(BaseEstimator, ClassifierMixin):
         """
         # TODO: calculate the analytical sub-gradient of soft-SVM w.r.t w and b
         margins = (X.dot(w) + b).reshape(-1, 1)
-        hinge_inputs = np.multiply(margins, y.reshape(-1, 1))
+        hinge_inputs = np.multiply( margins,y.reshape(-1,1))
 
-        f = lambda x : -1 if x < 1 else 1
-        g_w =2*w + C * np.multiply(np.multiply(np.sum(f(hinge_inputs), y), X))
+        f = lambda x : -1 if x < 1 else 0
+        f_outputs = np.apply_along_axis(f,1,hinge_inputs).reshape(-1,1)
+        g_w_inner = np.multiply(np.multiply(f_outputs, y.reshape(-1,1)), X)
+        g_w =2*w + C * np.sum(g_w_inner,axis=0)
 
-        g_b = np.multiply(np.sum(f(hinge_inputs), y))
+        g_b = np.sum(np.multiply(f_outputs, y.reshape(-1,1)))
         # g_w = None
         # g_b = 0.0
 
@@ -196,16 +205,34 @@ class SoftSVM(BaseEstimator, ClassifierMixin):
 
 
 
+def remove_nonnumerical(df):
+    df.pop('pcr_date')
+    df.pop('country')
+    df.pop('home_country')
+    df.pop('postcode')
+    df['sex'] = df['sex'].replace(['F','M'],[-1,1])
+    df['risk'] = df['risk'].replace(['High','Low'],[1,-1])
+    # df['spread'] = df['spread'].replace(['High', 'Low'],[1, 0])
+    df['is_army'] = df['is_army']*2-1
+    return df
+import prepare
 
 
 if __name__ == '__main__':
 
     df = pd.read_csv('train_clean.csv.csv')
+    df = prepare.normalize_data(df)
     df['spread'] = df['spread'].map(dict(High=1 , Low = -1))
+    df['covid'] = df['covid']*2-1
     # Q7_normalize(df)
     f_normalize = prepare.normalize_data(df.copy())
     df_normalize = prepare.normalize_data(df.copy())
 
-    # df_normalize = prepare.normalize_data(df.copy())
+    df_normalize = remove_nonnumerical(df_normalize)
 
-    compare_gradients(df_normalize, df , deltas=np.logspace(-5, -1, 9))
+    # df_normalize = prepare.normalize_data(df.copy())
+    df_normalize.pop('covid')
+    df_normalize.pop('risk')
+    df_normalize.pop('spread')
+    df_normalize.pop('is_army')
+    compare_gradients(df_normalize.values, df['covid'].values , deltas=np.logspace(-5, -1, 9))
