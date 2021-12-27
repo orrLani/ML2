@@ -7,9 +7,11 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 from sklearn.impute import SimpleImputer
 from sklearn import preprocessing
-
+# ask if we can use that
+import math
 
 # questions_module = __import__('205819220-308060873')
+
 
 
 def normalize(df,row,process):
@@ -17,6 +19,50 @@ def normalize(df,row,process):
     df[row] = process.fit_transform(temp)
 
     return df
+
+def convertToNumber(s):
+    return int.from_bytes(str(s).encode(), 'little')
+
+def convertToBinary(bool_condition):
+        if bool_condition:
+            return 1
+        return -1
+def create_number_convention(df):
+    # sex, pcr_dat, country, postcode , is_army , home_country , risk
+    # sex
+    df['sex'] = df['sex'].map(dict(F=-1,M=1))
+
+    # country
+    df['country'] = df['country'].apply(convertToNumber)
+
+    # postcode
+    df['postcode'] = df['postcode'].apply(convertToNumber)
+
+    # is army
+    df['is_army'] = df['is_army'].apply(convertToBinary)
+
+    # home_country
+    df['home_country'] = df['home_country'].apply(convertToNumber)
+
+    # targets
+    # covid
+    df['covid'] = df['covid'].apply(convertToBinary)
+    # risk
+    df['risk'] = df['risk'].map(dict(Low=-1, High=1))
+    # spread
+    df['spread'] = df['spread'].map(dict(Low=-1, High=1))
+
+    # drop date
+    df = df.drop(['pcr_date','postcode','home_country','country'], axis=1)
+
+
+
+
+    return df
+
+
+
+
 
 def normalize_data(data:pd.DataFrame):
     data = normalize(df=data, row='age', process=preprocessing.MinMaxScaler())
