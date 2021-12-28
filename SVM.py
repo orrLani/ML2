@@ -172,12 +172,13 @@ class SoftSVM(BaseEstimator, ClassifierMixin):
             batch_y = y[start_idx: end_idx]
 
             # TODO: Compute the (sub)gradient of the current *batch*
-            g_w, g_b = None, None
+            g_w, g_b = self.subgradient(self.w,self.b,self.C,batch_X,batch_y)
+
 
             # Perform a (sub)gradient step
             # TODO: update the learned parameters correctly
-            self.w = None
-            self.b = 0.0
+            self.w = self.w - g_w*self.lr
+            self.b = self.b - g_b*self.lr
 
             if keep_losses:
                 losses.append(self.loss(self.w, self.b, self.C, X, y))
@@ -205,8 +206,10 @@ class SoftSVM(BaseEstimator, ClassifierMixin):
         :param X: samples for prediction; array of shape (n_samples, n_features)
         :return: Predicted class labels for samples in X; array of shape (n_samples,)
         """
+        margins = (X.dot(self.w) + self.b).reshape(-1, 1)
         # TODO: compute the predicted labels (+1 or -1)
-        y_pred = None
+        y_pred = np.sign(margins)
+
 
         return y_pred
 
@@ -244,4 +247,13 @@ if __name__ == '__main__':
     df_normalize.pop('is_army')
     df_normalize.pop('Unnamed: 0')
     # df_normalize['PCR_10'] =  (df_normalize['PCR_10'] - df_normalize['PCR_10'].min())/(df_normalize['PCR_10'].max() - df_normalize['PCR_10'].min())
-    compare_gradients(df_normalize.values, df['covid'].values , deltas=np.logspace(-5, -1, 9))
+    # compare_gradients(df_normalize.values, df['covid'].values , deltas=np.logspace(-5, -1, 9))
+    clf = SoftSVM(C=1e2, lr=1e-5)
+    losses, accuracies = clf.fit_with_logs(df_normalize[['PCR_03','PCR_07','PCR_10']].values, df['spread'].values, max_iter=5000)
+    fig = plt.figure(figsize=(12, 7))
+    ax1 = fig.add_subplot(111)
+    line1 = ax1.semilogy(losses, c='b', label='?')
+    ax2 = ax1.twinx()
+    line2 = ax2.plot(accuracies, c='r', label='?')
+    ax2.grid(alpha=0.5)
+    plt.show()
