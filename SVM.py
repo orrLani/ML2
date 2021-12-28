@@ -213,7 +213,58 @@ class SoftSVM(BaseEstimator, ClassifierMixin):
 
         return y_pred
 
+def Q16(X,y):
+    compare_gradients(X, y, deltas=np.logspace(-5, -1, 9))
 
+
+def Q17(X, y):
+    clf = SoftSVM(C=1e2, lr=1e-5)
+    losses, accuracies = clf.fit_with_logs(X, y, max_iter=5000)
+    fig = plt.figure(figsize=(12, 7))
+    ax1 = fig.add_subplot(111)
+    line1 = ax1.semilogy(losses, c='b', label='?')
+    ax2 = ax1.twinx()
+    line2 = ax2.plot(accuracies, c='r', label='?')
+    ax2.grid(alpha=0.5)
+    plt.show()
+
+def Q18(X,y):
+    clf = SoftSVM(C=1e2, lr=1e-5)
+    losses, accuracies = clf.fit_with_logs(X, y, max_iter=5000)
+    fig = plt.figure(figsize=(12, 7))
+    ax1 = fig.add_subplot(111)
+    line1 = ax1.semilogy(losses, c='b', label='?')
+    ax2 = ax1.twinx()
+    line2 = ax2.plot(accuracies, c='r', label='?')
+    ax2.grid(alpha=0.5)
+    plt.show()
+
+from sklearn.preprocessing import PolynomialFeatures
+from sklearn.model_selection import validation_curve
+def Q19(X,y):
+    # C: float, lr: float = 1e-5
+    poly = PolynomialFeatures()
+    X = poly.fit_transform(X)
+    k = np.logspace(-10, -1, 10)
+    train_scores, valid_scores = validation_curve(
+        estimator=SoftSVM(C=1000),
+        X=X,
+        y=y,
+        param_name="lr",
+        param_range=k ,
+        cv=8)
+    train_mean = train_scores.mean(axis=1)
+    valid_mean = valid_scores.mean(axis=1)
+
+    plt.plot(range(-11,-1), train_mean, 'bo', label="training validation accuracy")
+    plt.plot(range(-11,-1), valid_mean, 'ro', label="training accuracy")
+    plt.xlabel('lr')
+    plt.ylabel('Accuracy')
+    plt.title("lr value - Accuracy")
+    plt.legend(loc='best')
+    plt.show()
+    k = valid_mean.max()
+    print(k)
 
 def remove_nonnumerical(df):
     df.pop('pcr_date')
@@ -246,14 +297,22 @@ if __name__ == '__main__':
     df_normalize.pop('spread')
     df_normalize.pop('is_army')
     df_normalize.pop('Unnamed: 0')
+
+    # Q16(df_normalize.values, df['covid'].values)
+    Q17(df_normalize.values, df['covid'].values)
+
+    Q18(df_normalize[['PCR_03', 'PCR_07', 'PCR_10']].values, df['spread'].values)
+
+    Q19(df_normalize[['PCR_03', 'PCR_07', 'PCR_10']].values, df['spread'].values)
     # df_normalize['PCR_10'] =  (df_normalize['PCR_10'] - df_normalize['PCR_10'].min())/(df_normalize['PCR_10'].max() - df_normalize['PCR_10'].min())
     # compare_gradients(df_normalize.values, df['covid'].values , deltas=np.logspace(-5, -1, 9))
-    clf = SoftSVM(C=1e2, lr=1e-5)
-    losses, accuracies = clf.fit_with_logs(df_normalize[['PCR_03','PCR_07','PCR_10']].values, df['spread'].values, max_iter=5000)
-    fig = plt.figure(figsize=(12, 7))
-    ax1 = fig.add_subplot(111)
-    line1 = ax1.semilogy(losses, c='b', label='?')
-    ax2 = ax1.twinx()
-    line2 = ax2.plot(accuracies, c='r', label='?')
-    ax2.grid(alpha=0.5)
-    plt.show()
+    # clf = SoftSVM(C=1e2, lr=1e-5)
+    # losses, accuracies = clf.fit_with_logs(df_normalize[['PCR_03','PCR_07','PCR_10']].values, df['spread'].values, max_iter=5000)
+    # fig = plt.figure(figsize=(12, 7))
+    # ax1 = fig.add_subplot(111)
+    # line1 = ax1.semilogy(losses, c='b', label='?')
+    # ax2 = ax1.twinx()
+    # line2 = ax2.plot(accuracies, c='r', label='?')
+    # ax2.grid(alpha=0.5)
+    # plt.show()
+    # Q19(df_normalize)
