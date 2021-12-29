@@ -77,7 +77,6 @@ def normalize_data(data:pd.DataFrame):
     data = normalize(df=data, row='PCR_02', process=preprocessing.StandardScaler())
     data = normalize(df=data, row='PCR_03', process=preprocessing.StandardScaler())
     data = normalize(df=data, row='PCR_04', process=preprocessing.MinMaxScaler())
-    data = normalize(df=data, row='PCR_05', process=preprocessing.MinMaxScaler())
     data = normalize(df=data, row='PCR_06', process=preprocessing.StandardScaler())
     data = normalize(df=data, row='PCR_07', process=preprocessing.StandardScaler())
     data = normalize(df=data,row='PCR_08',process=preprocessing.MinMaxScaler())
