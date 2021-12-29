@@ -47,95 +47,6 @@ def get_histograms(data):
 
 
 
-def Q11(data):
-    pass
-
-
-
-def Q12(data):
-    # get_histograms(data)
-
-    # Corr between the features to risk
-    names = data.keys().to_list()
-    corr_dict = {}
-    for name in names:
-        try:
-            if name =='is_army' or name=='risk':
-                raise Exception
-            corr = abs(data['risk'].corr(data[name]))
-            corr_dict[name] = corr
-
-            # print("Correlation between risk and  " + name + " is: {:.3f}".format(corr))
-
-        except Exception:
-            pass
-    corr_dict = {k: v for k, v in sorted(corr_dict.items(), key=lambda item: item[1],reverse=True)}
-    print(corr_dict)
-    # df['risk'] = df['risk'].map(dict(High=1, Low=-1))
-    list = []
-
-    for item in corr_dict:
-        list.append(item)    # get_histograms(data)
-
-    # Corr between the features to risk
-    names = data.keys().to_list()
-    corr_dict = {}
-    for name in names:
-        try:
-            if name =='is_army' or name=='risk':
-                raise Exception
-            corr = abs(data['risk'].corr(data[name]))
-            corr_dict[name] = corr
-
-            print("Correlation between risk and  " + name + " is: {:.3f}".format(corr))
-
-        except Exception:
-            pass
-    corr_dict = {k: v for k, v in sorted(corr_dict.items(), key=lambda item: item[1],reverse=True)}
-    print(corr_dict)
-    # df['risk'] = df['risk'].map(dict(High=1, Low=-1))
-    list = []
-
-    for item in corr_dict:
-        list.append(item)
-
-def Q13(data):
-    model = tree.DecisionTreeClassifier(criterion="entropy",max_depth=4)
-    # drop
-    data = data.drop(['Unnamed: 0','covid','spread'], axis=1)
-    X = data
-    Y = data['risk']
-    X= X.drop(['risk'], axis=1)
-    # X = np.float32(X)
-    # Y = np.float(Y)
-
-    # X = np.nan_to_num(X, nan=-9999, posinf=33333333, neginf=33333333)
-    # Y = np.nan_to_num(Y, nan=-9999, posinf=33333333, neginf=33333333)
-    model.fit(X,Y)
-    plt.figure(figsize=(19, 19))
-    tree.plot_tree(model,filled=True,fontsize=7,feature_names=X.columns)
-    plt.title('DecisionTreeClassifier with max death 4')
-    plt.show()
-
-    predict = model.predict(X)
-    risk = accuracy_score(Y, predict)
-    print(risk)
-
-
-    # create train set
-    # feature_cols =
-    # X = pima[feature_cols]  # Features
-    #y = pima.label  # Target variable
-    #X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3,
-    #                                                    random_state=1)  # 70% training and 30% test
-
-
-    pass
-
-def Q15(data):
-    parameters = {'max_depth': ('linear', 'rbf'), 'C': [1, 10]}
-    return df
-
 
 if __name__ == '__main__':
     df =  pd.read_csv('train_clean.csv.csv')
@@ -148,6 +59,6 @@ if __name__ == '__main__':
     df = prepare.create_number_convention(df)
     # Q12(df)
     # Q13(data=df)
-        df = Q15(df)
+    df = Q15(df)
 
 
