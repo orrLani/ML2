@@ -299,6 +299,7 @@ if __name__ == '__main__':
     df_normalize.pop('Unnamed: 0')
 
     # Q16(df_normalize.values, df['covid'].values)
+    df_normalize.pop('PCR_05')
     Q17(df_normalize.values, df['covid'].values)
 
     Q18(df_normalize[['PCR_03', 'PCR_07', 'PCR_10']].values, df['spread'].values)
