@@ -227,6 +227,31 @@ def remove_nonnumerical(df):
     return df
 import prepare
 
+def Q16(X,y):
+    compare_gradients(X, y, deltas=np.logspace(-5, -1, 9))
+
+def Q17(X,y):
+    clf = SoftSVM(C=1e2, lr=1e-5)
+    losses, accuracies = clf.fit_with_logs(X, y,max_iter=5000)
+    fig = plt.figure(figsize=(12, 7))
+    ax1 = fig.add_subplot(111)
+    line1 = ax1.semilogy(losses, c='b', label='?')
+    ax2 = ax1.twinx()
+    line2 = ax2.plot(accuracies, c='r', label='?')
+    ax2.grid(alpha=0.5)
+    plt.show()
+
+def Q18(X,y):
+    clf = SoftSVM(C=1e2, lr=1e-5)
+    losses, accuracies = clf.fit_with_logs(X, y, max_iter=5000)
+    fig = plt.figure(figsize=(12, 7))
+    ax1 = fig.add_subplot(111)
+    line1 = ax1.semilogy(losses, c='b', label='?')
+    ax2 = ax1.twinx()
+    line2 = ax2.plot(accuracies, c='r', label='?')
+    ax2.grid(alpha=0.5)
+    plt.show()
+
 
 if __name__ == '__main__':
 
@@ -248,12 +273,6 @@ if __name__ == '__main__':
     df_normalize.pop('Unnamed: 0')
     # df_normalize['PCR_10'] =  (df_normalize['PCR_10'] - df_normalize['PCR_10'].min())/(df_normalize['PCR_10'].max() - df_normalize['PCR_10'].min())
     # compare_gradients(df_normalize.values, df['covid'].values , deltas=np.logspace(-5, -1, 9))
-    clf = SoftSVM(C=1e2, lr=1e-5)
-    losses, accuracies = clf.fit_with_logs(df_normalize[['PCR_03','PCR_07','PCR_10']].values, df['spread'].values, max_iter=5000)
-    fig = plt.figure(figsize=(12, 7))
-    ax1 = fig.add_subplot(111)
-    line1 = ax1.semilogy(losses, c='b', label='?')
-    ax2 = ax1.twinx()
-    line2 = ax2.plot(accuracies, c='r', label='?')
-    ax2.grid(alpha=0.5)
-    plt.show()
+    Q16(df_normalize.values,df['covid'].values)
+    Q17(df_normalize.values,df['covid'].values)
+    Q18(df_normalize[['PCR_03', 'PCR_07', 'PCR_10']].values,df['spread'].values)
