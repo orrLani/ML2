@@ -1,6 +1,5 @@
 from sklearn.base import BaseEstimator, ClassifierMixin
 import numpy as np
-
 class SoftSVM(BaseEstimator, ClassifierMixin):
     """
     Custom C-Support Vector Classification.
@@ -46,11 +45,12 @@ class SoftSVM(BaseEstimator, ClassifierMixin):
         hinge_inputs = np.multiply(margins, y.reshape(-1, 1))
 
         norm = np.linalg.norm(w)
-
+        np.power(norm,2)
         # TODO: complete the loss calculation
         loss = 0.0
 
-        return
+        loss = np.power(norm,2) * C * np.sum( (max(0,1-hinge_inputs)))
+        return loss
 
     @staticmethod
     def subgradient(w, b: float, C: float, X, y):
@@ -65,8 +65,15 @@ class SoftSVM(BaseEstimator, ClassifierMixin):
         :return: a tuple with (the gradient of the weights, the gradient of the bias)
         """
         # TODO: calculate the analytical sub-gradient of soft-SVM w.r.t w and b
-        g_w = None
-        g_b = 0.0
+        margins = (X.dot(w) + b).reshape(-1, 1)
+        hinge_inputs = np.multiply(margins, y.reshape(-1, 1))
+
+        f = lambda x : -1 if x < 1 else 1
+        g_w =2*w + C * np.multiply(np.multiply(np.sum(f(hinge_inputs), y), X))
+
+        g_b = np.multiply(np.sum(f(hinge_inputs), y))
+        # g_w = None
+        # g_b = 0.0
 
         return g_w, g_b
 

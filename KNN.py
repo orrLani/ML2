@@ -6,11 +6,6 @@ import copy
 import pandas as pd
 from collections import Counter
 from sklearn.datasets import make_classification
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.model_selection import cross_val_score
-from sklearn.model_selection import cross_val_predict
-from sklearn.metrics import confusion_matrix
-
 import seaborn as sns
 import prepare
 import matplotlib.pyplot as plt
@@ -24,7 +19,21 @@ class kNN(BaseEstimator, ClassifierMixin):
         self.n_neighbors = n_neighbors
         self.data = None
         self.targets = None
-
+    # X is the dataframe
+    # y is the labels of target values (names)
+    # def fit(self, X, y):
+    #     # self.data = copy.deepcopy(X)
+    #     self.data = X.copy()
+    #     if y.ndim == 1:
+    #         self.targets = np.expand_dims(a=y,axis=1)
+    #     else:
+    #         self.targets = y.copy()
+    #         # self.targets = copy.deepcopy(y)
+    #
+    #     # we need to do by continous values?
+    #
+    #     # TODO: complete
+    #     return self
     def fit(self, X, y):
         # self.data = copy.deepcopy(X)
         self.data = pd.DataFrame(X)
@@ -143,7 +152,7 @@ def Q5(df):
     # df['spread'] = df['spread'].map(dict(High=1 , Low = -1))
     # arr = df[['PCR_03','PCR_07','PCR_10','spread']].to_numpy()
     my_knn = kNN(n_neighbors=11)
-    my_knn = my_knn.fit(df[['PCR_03','PCR_07','PCR_10']], df['spread'])
+    my_knn = my_knn.fit(df[['PCR_03','PCR_07','PCR_10','spread']], df['spread'])
     print(my_knn.score(my_knn.data, my_knn.targets))
 
 
@@ -153,21 +162,21 @@ def normalize(df,row,process):
 
     return df
 
-def Q7(df):
+def Q7_normalize(df):
 
 
     df = normalize(df=df,row='PCR_03',process=preprocessing.StandardScaler())
     df = normalize(df=df,row='PCR_07',process=preprocessing.StandardScaler())
-    df = normalize(df=df,row= 'PCR_10',process=preprocessing.StandardScaler())
+    df = normalize(df=df,row= 'PCR_10',process=preprocessing.MinMaxScaler())
     #df = normalize(df=df, row='PCR_10', process=preprocessing.StandardScaler())
     my_knn = kNN(n_neighbors=11)
 
     # print the knn score
-    my_knn = my_knn.fit(df[['PCR_03','PCR_07','PCR_10']], df['spread'])
+    my_knn = my_knn.fit(df[['PCR_03','PCR_07','PCR_10','spread']], df['spread'])
     print(my_knn.score(my_knn.data, my_knn.targets))
 
     # normalize the rest features
-    return df
+
 def Q8(df_before,df_after):
 
     # df.hist(figsize=(10, 10))
@@ -192,70 +201,61 @@ def Q8(df_before,df_after):
 
     plt.show()
 
-    pass
-
-from sklearn.model_selection import validation_curve
-def Q9(df:pd.DataFrame) -> int:
-
-    k = np.arange(1, 61, 2)
-    train_scores, valid_scores = validation_curve(
-        estimator=kNN(),
-        X=df[['PCR_03', 'PCR_07', 'PCR_10']],
-        y=df['spread'],
-        param_name="n_neighbors",
-        param_range = np.arange(1, 61, 2),
-        cv=8)
-    train_mean = train_scores.mean(axis=1)
-    valid_mean = valid_scores.mean(axis=1)
-    plt.plot(k,train_mean,'bo', label="training validation accuracy")
-    plt.plot(k, valid_mean, 'ro',label="training accuracy")
-    plt.xlabel('Accuracy')
-    plt.ylabel('K (neighbours) value')
-    plt.title("k value - Accuracy")
-    plt.legend(loc='best')
-    plt.show()
-    k = valid_mean.max()
-    return k
-
-from sklearn.metrics import plot_confusion_matrix
-import seaborn as sn
-
-def Q10(df:pd.DataFrame,k):
-    my_knn = kNN(n_neighbors=k)
-    X = df[['PCR_03', 'PCR_07', 'PCR_10']]
-    y = df['spread']
-    y_pred = cross_val_predict(my_knn, X, y, cv=8)
-    conf_mat = confusion_matrix(y, y_pred)
-    print(conf_mat)
-    sn.set(font_scale=1.1)  # for label size
-    conf_mat = pd.DataFrame(conf_mat,range(2), range(2))
-    xlabels = ['Positive',' Negative']
-    ylabels = ['Positive', 'Negative']
-    ax = sn.heatmap(conf_mat, xticklabels=xlabels,yticklabels=ylabels, fmt='g',annot=True)
-    ax.set_title('cross-validated 2 × 2')
-    ax.set_xlabel('Actual labels')
-    ax.set_ylabel('Predicted')
 
 
-    plt.show()
+
+
+#############
 
 
 if __name__ == '__main__':
 
-    # df = pd.read_csv('ido.csv')
-    df =  pd.read_csv('train_clean.csv.csv')
+    df = pd.read_csv('train_clean.csv.csv')
     df['spread'] = df['spread'].map(dict(High=1 , Low = -1))
-    # Q5(df)
-    # df = Q7(df.copy())
-
+    Q5(df)
+    # Q7_normalize(df)
+    f_normalize = prepare.normalize_data(df.copy())
     df_normalize = prepare.normalize_data(df.copy())
 
-    # Q8(df,df_normalize)
-   # k = Q9(df=df_normalize)
-    k = 9
-    # best k is 9
-    Q10(df=df_normalize,k=k)
+    # df_normalize = prepare.normalize_data(df.copy())
 
+    compare_gradients(df_normalize, df , deltas=np.logspace(-5, -1, 9))
 
-
-
+    # f = kNN(2)
+    # X = np.array([[1,1,1],[1,2,3],[-1,-1,-1]])
+    # y = np.array([1 , -1 ,1])
+    #
+    # f.fit(X,y)
+    # f.predict(X)
+    # print("meow")
+    #
+    # fig = plt.figure()
+    # ax = fig.add_subplot(projection='3d')
+    #
+    # n = 100
+    # ax.tick_params(axis='x', colors='green')
+    # ax.tick_params(axis='y', colors='blue')
+    # ax.tick_params(axis='z', colors='black')
+    # # For each set of style and range settings, plot n random points in the box
+    # # defined by x in [23, 32], y in [0, 100], z in [zlow, zhigh].
+    # df = pd.read_csv("train_clean.csv.csv")
+    # samples = df.sample(n= n )
+    # for m, zlow, zhigh in [('o', -50, -25), ('^', -30, -5)]:
+    #     samples1 = samples[samples['spread'] == 'High']
+    #     pcr03 = samples1['PCR_03'].values
+    #     pcr07 = samples1['PCR_07'].values
+    #     pcr10 = samples1['PCR_10'].values
+    #     ax.scatter(pcr07, pcr10, pcr03, marker=m, c= 'green')
+    #     samples2 = samples[samples['spread'] == 'Low']
+    #     pcr03 = samples2['PCR_03'].values
+    #     pcr07 = samples2['PCR_07'].values
+    #     pcr10 = samples2['PCR_10'].values
+    #     ax.scatter(pcr07, pcr10, pcr03, marker=m, c='red')
+    #
+    #
+    #
+    # ax.set_zlabel('PCR_03')
+    # ax.set_ylabel('PCR_10')
+    # ax.set_xlabel('PCR_07')
+    # # ax.view_init(30, 25)
+    # plt.show()
